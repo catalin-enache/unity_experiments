@@ -1,83 +1,161 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.Serialization;
+
+[System.Serializable]
+public class UserPointList
+{
+    public List<Vector3> userPointList = new List<Vector3>();
+    public Vector3 this[int index]
+    {
+        get => userPointList[index];
+        set => userPointList[index] = value;
+    }
+
+    public override string ToString()
+    {
+        return "UserPointList: " + userPointList.Select(v => v.ToString()).Aggregate((acc, item) => acc + item);
+    }
+}
+
+[System.Serializable]
+public class UserListOfPointList
+{
+    public List<UserPointList> userListOfPointList = new List<UserPointList>();
+    public UserPointList this[int index]
+    {
+        get => userListOfPointList[index];
+        set => userListOfPointList[index] = value;
+    }
+    public override string ToString()
+    {
+        return "UserListOfPointList: " + userListOfPointList;
+    }
+}
 
 public class LineScript : MonoBehaviour
 {
-    public Vector3 p1Position = Vector3.zero;
-    public Vector3 p2Position = Vector3.up;
-    public float lineThickness = 0.01f;
-    public float handlersThickness = 0.1f;
-    private GameObject _p1;
-    private GameObject _p2;
-    private GameObject line;
+    public UserListOfPointList userData = new UserListOfPointList();
+    private List<List<GameObject>> gameObjectListOfPointList = new List<List<GameObject>>();
+    private List<List<GameObject>> gameObjectListOfLineList = new List<List<GameObject>>();
+
+    public float initialLineThickness = 0.01f;
+    public float initialHandlersThickness = 0.1f;
+    public Color initialHandlersColor = Color.green;
+    public Color initialLineColor = Color.yellow;
+    
+    public delegate void OnChange(Move3D gameObject);
+    public event OnChange onChangeCallback;
+
     void Start()
     {
-        _p1 = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        _p1.transform.SetPositionAndRotation(p1Position, Quaternion.identity);
-        _p1.transform.localScale = Vector3.one * handlersThickness;
-        _p1.AddComponent<Move3D>();
-        _p1.GetComponent<Move3D>().onChangeCallback += UpdateP1Position;
-        // _p1.GetComponent<Move3D>().onChangeEvent.AddListener(UpdateP1Position);
+        for (int i = 0; i < userData.userListOfPointList.Count; i++)
+        {
+            UserPointList userPointList = userData.userListOfPointList[i];
+            List<GameObject> gameObjectPointList = new List<GameObject>();
+            List<GameObject> gameObjectLineList = new List<GameObject>();
+            gameObjectListOfPointList.Add(gameObjectPointList);
+            gameObjectListOfLineList.Add(gameObjectLineList);
+            Vector3 prevPoint = Vector3.zero;
+            for (int j = 0; j < userPointList.userPointList.Count; j++)
+            {
+                Vector3 point = userPointList.userPointList[j];
+                GameObject pointObject = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                pointObject.GetComponent<Renderer>().material.color = initialHandlersColor;
+                pointObject.name = "Point: " + i + ", " + j;
+                pointObject.transform.SetPositionAndRotation(point, Quaternion.identity);
+                pointObject.transform.localScale = Vector3.one * initialHandlersThickness;
+                Move3D m3d = pointObject.AddComponent<Move3D>();
+                m3d.metaData.Add("listIndex", i);
+                m3d.metaData.Add("pointIndex", j);
+                m3d.OnMove3DMovingEvent.AddListener(UpdatePointPosition);
+                gameObjectPointList.Add(pointObject);
 
-        _p2 = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        _p2.transform.SetPositionAndRotation(p2Position, Quaternion.identity);
-        _p2.transform.localScale = Vector3.one * handlersThickness;
-        _p2.AddComponent<Move3D>();
-        // _p2.GetComponent<Move3D>().onChangeCallback += UpdateP2Position;
-        _p2.GetComponent<Move3D>().onChangeEvent.AddListener(UpdateP2Position);
+                if (j > 0)
+                {
+                    GameObject line = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                    line.GetComponent<Renderer>().material.color = initialLineColor;
+                    line.name = "Line: " + i + ", " + (j - 1);
+                    line.transform.SetPositionAndRotation(prevPoint, Quaternion.identity);
+                    line.transform.up = (point - prevPoint);
+                    line.transform.localScale = Vector3.one * initialLineThickness;
+                    gameObjectLineList.Add(line);
+                };
 
-        line = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-        line.transform.SetPositionAndRotation(p1Position, Quaternion.identity);
-        line.transform.up = (p2Position - p1Position);
-        line.transform.localScale = Vector3.one * lineThickness;
+                prevPoint = point;
+            }
+        }
     }
 
     private void OnDestroy()
     {
-        new List<GameObject>(new []{_p1, _p2, line}).ForEach(Destroy);
+        for (int i = 0; i < userData.userListOfPointList.Count; i++)
+        {
+            UserPointList userPointList = userData.userListOfPointList[i];
+            for (int j = 0; j < userPointList.userPointList.Count; j++)
+            {
+                Destroy(gameObjectListOfPointList[i][j]);
+                if (j > 0)
+                {
+                    Destroy(gameObjectListOfLineList[i][j - 1]);
+                }
+            }
+        }
     }
 
-    void UpdateP1Position(GameObject p1)
+    void UpdatePointPosition(Move3D obj)
     {
-        p1Position = p1.transform.position;
-    }
-    
-    void UpdateP2Position(GameObject p2)
-    {
-        p2Position = p2.transform.position;
+        userData[(int)obj.metaData["listIndex"]][(int)obj.metaData["pointIndex"]] = obj.transform.position;
+        onChangeCallback?.Invoke(obj);
     }
 
     void Update()
     {
-        // Sync with Inspector if positions were changed there.
-        _p1.transform.position = p1Position;
-        _p2.transform.position = p2Position;
-        
-        Vector3 diff = (p2Position - p1Position);
-        Vector3 orientation = diff.normalized;
-        float distance = diff.magnitude;
-        float lineSize = distance / 2; // cylinders have 2 units on y coord => we're making it 1 unit
-        float halfDistance = distance / 2; // related to middle point
-        Vector3 middlePoint = (p1Position + p2Position) / 2f;
-        
-        // scale
-        Vector3 localScale = line.transform.localScale;
-        line.transform.localScale = new Vector3(localScale.x,lineSize, localScale.z);
-        
-        // position
-        // line.transform.position = p1Position + orientation * halfDistance;
-        line.transform.position = middlePoint;
-        
-        // rotation
-        // line.transform.rotation = Quaternion.LookRotation(orientation);
-        // then
-        // line.transform.rotation *= Quaternion.Euler(90, 0, 0);
-        // or
-        // line.transform.rotation *= Quaternion.FromToRotation(Vector3.up, Vector3.forward);
-        // or just
-        line.transform.up = orientation;
+        for (int i = 0; i < userData.userListOfPointList.Count; i++)
+        {
+            UserPointList userPointList = userData.userListOfPointList[i];
+            Vector3 prevPoint = Vector3.zero;
+            for (int j = 0; j < userPointList.userPointList.Count; j++)
+            {
+                // Sync with Inspector if positions were changed there.
+                Vector3 point = userPointList.userPointList[j];
+                gameObjectListOfPointList[i][j].transform.position = point;
+                
+                if (j > 0)
+                {
+                    GameObject line = gameObjectListOfLineList[i][j - 1];
+                    Vector3 diff = (prevPoint - point);
+                    Vector3 orientation = diff.normalized;
+                    float distance = diff.magnitude;
+                    float lineSize = distance / 2; // cylinders have 2 units on y coord => we're making it 1 unit
+                    float halfDistance = distance / 2; // related to middle point
+                    Vector3 middlePoint = (point + prevPoint) / 2;
+                    
+                    // scale
+                    Vector3 localScale = line.transform.localScale;
+                    line.transform.localScale = new Vector3(localScale.x,lineSize, localScale.z);
+                    
+                    // position
+                    // line.transform.position = point + orientation * halfDistance;
+                    line.transform.position = middlePoint;
+                    
+                    // rotation
+                    // line.transform.rotation = Quaternion.LookRotation(orientation);
+                    // then
+                    // line.transform.rotation *= Quaternion.Euler(90, 0, 0);
+                    // or
+                    // line.transform.rotation *= Quaternion.FromToRotation(Vector3.up, Vector3.forward);
+                    // or just
+                    line.transform.up = orientation;
+                };
+                
+
+                prevPoint = point;
+            }
+        }
     }
 }
