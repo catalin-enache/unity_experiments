@@ -6,40 +6,43 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-[System.Serializable]
-public class UserPointList
+[System.Serializable] 
+public class UserPointList : List<Vector3>
 {
-    public List<Vector3> userPointList = new List<Vector3>();
-    public Vector3 this[int index]
-    {
-        get => userPointList[index];
-        set => userPointList[index] = value;
-    }
+    [SerializeField]
+    private List<Vector3> userPointList;
 
-    public override string ToString()
+    public UserPointList()
     {
-        return "UserPointList: " + userPointList.Select(v => v.ToString()).Aggregate((acc, item) => acc + item);
+        userPointList = this;
     }
+    
+    public override string ToString()
+     {
+         return "UserPointList: " + userPointList.Select(v => v.ToString()).Aggregate((acc, item) => acc + ", " + item);
+     }
 }
 
-[System.Serializable]
-public class UserListOfPointList
+[System.Serializable] 
+public class UserListOfPointList : List<UserPointList>
 {
-    public List<UserPointList> userListOfPointList = new List<UserPointList>();
-    public UserPointList this[int index]
+    [SerializeField]
+    private List<UserPointList> userListOfPointList;
+
+    public UserListOfPointList()
     {
-        get => userListOfPointList[index];
-        set => userListOfPointList[index] = value;
+        userListOfPointList = this;
     }
+    
     public override string ToString()
-    {
-        return "UserListOfPointList: " + userListOfPointList;
-    }
+     {
+         return "UserListOfPointList: " + userListOfPointList.Select(pointList => pointList.ToString()).Aggregate((acc, item) => acc + ", " +  item);
+     }
 }
 
 public class LineScript : MonoBehaviour
 {
-    public UserListOfPointList userData = new UserListOfPointList();
+    public UserListOfPointList userListOfPointList = new UserListOfPointList();
     private List<List<GameObject>> gameObjectListOfPointList = new List<List<GameObject>>();
     private List<List<GameObject>> gameObjectListOfLineList = new List<List<GameObject>>();
 
@@ -53,17 +56,17 @@ public class LineScript : MonoBehaviour
 
     void Start()
     {
-        for (int i = 0; i < userData.userListOfPointList.Count; i++)
+        for (int i = 0; i < userListOfPointList.Count; i++)
         {
-            UserPointList userPointList = userData.userListOfPointList[i];
+            UserPointList userPointList = userListOfPointList[i];
             List<GameObject> gameObjectPointList = new List<GameObject>();
             List<GameObject> gameObjectLineList = new List<GameObject>();
             gameObjectListOfPointList.Add(gameObjectPointList);
             gameObjectListOfLineList.Add(gameObjectLineList);
             Vector3 prevPoint = Vector3.zero;
-            for (int j = 0; j < userPointList.userPointList.Count; j++)
+            for (int j = 0; j < userPointList.Count; j++)
             {
-                Vector3 point = userPointList.userPointList[j];
+                Vector3 point = userPointList[j];
                 GameObject pointObject = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                 pointObject.GetComponent<Renderer>().material.color = initialHandlersColor;
                 pointObject.name = "Point: " + i + ", " + j;
@@ -90,43 +93,22 @@ public class LineScript : MonoBehaviour
             }
         }
     }
-
-    private void OnDestroy()
-    {
-        for (int i = 0; i < userData.userListOfPointList.Count; i++)
-        {
-            UserPointList userPointList = userData.userListOfPointList[i];
-            for (int j = 0; j < userPointList.userPointList.Count; j++)
-            {
-                Destroy(gameObjectListOfPointList[i][j]);
-                if (j > 0)
-                {
-                    Destroy(gameObjectListOfLineList[i][j - 1]);
-                }
-            }
-        }
-    }
-
-    void UpdatePointPosition(Move3D obj)
-    {
-        userData[(int)obj.metaData["listIndex"]][(int)obj.metaData["pointIndex"]] = obj.transform.position;
-        onChangeCallback?.Invoke(obj);
-    }
-
+    
     void Update()
     {
-        for (int i = 0; i < userData.userListOfPointList.Count; i++)
+        for (int i = 0; i < userListOfPointList.Count; i++)
         {
-            UserPointList userPointList = userData.userListOfPointList[i];
+            UserPointList userPointList = userListOfPointList[i];
             Vector3 prevPoint = Vector3.zero;
-            for (int j = 0; j < userPointList.userPointList.Count; j++)
+            for (int j = 0; j < userPointList.Count; j++)
             {
                 // Sync with Inspector if positions were changed there.
-                Vector3 point = userPointList.userPointList[j];
+                Vector3 point = userPointList[j];
                 gameObjectListOfPointList[i][j].transform.position = point;
                 
                 if (j > 0)
                 {
+                    Debug.Log("line");
                     GameObject line = gameObjectListOfLineList[i][j - 1];
                     Vector3 diff = (prevPoint - point);
                     Vector3 orientation = diff.normalized;
@@ -158,4 +140,27 @@ public class LineScript : MonoBehaviour
             }
         }
     }
+
+    private void OnDestroy()
+    {
+        for (int i = 0; i < userListOfPointList.Count; i++)
+        {
+            UserPointList userPointList = userListOfPointList[i];
+            for (int j = 0; j < userPointList.Count; j++)
+            {
+                Destroy(gameObjectListOfPointList[i][j]);
+                if (j > 0)
+                {
+                    Destroy(gameObjectListOfLineList[i][j - 1]);
+                }
+            }
+        }
+    }
+
+    void UpdatePointPosition(Move3D obj)
+    {
+        userListOfPointList[(int)obj.metaData["listIndex"]][(int)obj.metaData["pointIndex"]] = obj.transform.position;
+        onChangeCallback?.Invoke(obj);
+    }
+    
 }
