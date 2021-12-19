@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace Experiments.Lib
@@ -11,10 +12,18 @@ namespace Experiments.Lib
         private float rotX;
         private float rotY;
 
+        void Start()
+        {
+            rotX = transform.localEulerAngles.x;
+            rotY = transform.localEulerAngles.y;
+        }
+
+        Boolean isRightClicked => Input.GetMouseButton(1);
+       
+        
         void Update()
         {
-            rightClicked = Input.GetMouseButton(1);
-            if (!rightClicked) return;
+            if (!isRightClicked) return;
         
             float mouseX = Input.GetAxis("Mouse X");
             float mouseY = Input.GetAxis("Mouse Y");

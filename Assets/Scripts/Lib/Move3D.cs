@@ -10,26 +10,30 @@ namespace Experiments.Lib
     [RequireComponent(typeof(Collider))]
     public class Move3D : MonoBehaviour
     {
-        private static Color hoverColor = Color.red;
         private Camera mainCamera;
-        private float cameraZDistance;
         private Boolean isDragging;
         private Vector3 screenPosition;
         private Vector3 newWorldPosition;
+        private float offsetX;
+        private float offsetY;
+        
         public Dictionary<string, object> metaData = new Dictionary<string, object>();
         public Move3DMovingEvent OnMove3DMovingEvent = new Move3DMovingEvent();
-        private Color initialColor;
+        public Move3DMovingEvent OnMove3DMouseOver = new Move3DMovingEvent();
+        public Move3DMovingEvent OnMove3DMouseExit = new Move3DMovingEvent();
     
         void Start()
         {
             mainCamera = Camera.main;
-            initialColor = GetComponent<Renderer>().material.color;
+            screenPosition = mainCamera.WorldToScreenPoint(transform.localPosition);
         }
  
         private void OnMouseDown()
         {
+            screenPosition = mainCamera.WorldToScreenPoint(transform.localPosition);
+            offsetX = Input.mousePosition.x - screenPosition.x;
+            offsetY = Input.mousePosition.y - screenPosition.y;
             isDragging = true;
-            cameraZDistance = mainCamera.WorldToScreenPoint(transform.position).z;
         }
 
         private void OnMouseUp()
@@ -39,19 +43,21 @@ namespace Experiments.Lib
 
         private void OnMouseOver()
         {
-            GetComponent<Renderer>().material.color = hoverColor;
+            OnMove3DMouseOver.Invoke(this);
         }
-
+        
         private void OnMouseExit()
         {
-            GetComponent<Renderer>().material.color = initialColor;
+            OnMove3DMouseExit.Invoke(this);
         }
 
         void OnMouseDrag()
         {
-            screenPosition = new Vector3(Input.mousePosition.x, Input.mousePosition.y, cameraZDistance);
+            float newXPos = Input.mousePosition.x - offsetX;
+            float newYPos = Input.mousePosition.y - offsetY;
+            screenPosition = new Vector3(newXPos, newYPos, screenPosition.z);
             newWorldPosition = mainCamera.ScreenToWorldPoint(screenPosition);
-            transform.position = newWorldPosition;
+            transform.localPosition = newWorldPosition;
             OnMove3DMovingEvent.Invoke(this);
         }
 
@@ -63,7 +69,7 @@ namespace Experiments.Lib
             GUILayout.Label("Name: " + name);
             GUILayout.Label("Screen pixels: " + mainCamera.pixelWidth + ":" + mainCamera.pixelHeight);
             GUILayout.Label("Screen position: " + screenPosition);
-            GUILayout.Label("World position: " + transform.position.ToString("F3"));
+            GUILayout.Label("World position: " + transform.localPosition.ToString("F3"));
             GUILayout.EndArea();
             // EditorGUI.DrawRect(rect, new Color(1,1,0,0.05f));
         }
