@@ -139,7 +139,11 @@ namespace Experiments.Lib
                     // Sync with Inspector if positions were changed there.
                     PointColor point = userPointsList[j];
                     GameObject gameObjectPoint  = gameObjectListOfPointsLists[i][j];
-                    gameObjectPoint.transform.position = point.position;
+
+                    if (gameObjectPoint.transform.position != point.position)
+                    {
+                        gameObjectPoint.transform.position = point.position;
+                    }
 
                     if (j > 0 && (gameObjectPoint.transform.hasChanged || gameObjectListOfPointsLists[i][j - 1].transform.hasChanged))
                     {
