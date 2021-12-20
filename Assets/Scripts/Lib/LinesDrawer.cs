@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -68,8 +69,8 @@ namespace Experiments.Lib
     public class LinesDrawer : MonoBehaviour
     {
         public UserListOfPointsLists userListOfPointsLists = new UserListOfPointsLists();
-        private List<List<GameObject>> gameObjectListOfPointList = new List<List<GameObject>>();
-        private List<List<GameObject>> gameObjectListOfLineList = new List<List<GameObject>>();
+        private List<List<GameObject>> gameObjectListOfPointsLists = new List<List<GameObject>>();
+        private List<List<GameObject>> gameObjectListOfLinesLists = new List<List<GameObject>>();
         
         public delegate void OnChange(Move3D gameObject);
         public event OnChange onChangeCallback;
@@ -79,10 +80,10 @@ namespace Experiments.Lib
             for (int i = 0; i < userListOfPointsLists.Count; i++)
             {
                 UserPointsList userPointsList = userListOfPointsLists[i];
-                List<GameObject> gameObjectPointList = new List<GameObject>();
-                List<GameObject> gameObjectLineList = new List<GameObject>();
-                gameObjectListOfPointList.Add(gameObjectPointList);
-                gameObjectListOfLineList.Add(gameObjectLineList);
+                List<GameObject> gameObjectPointsList = new List<GameObject>();
+                List<GameObject> gameObjectLinesList = new List<GameObject>();
+                gameObjectListOfPointsLists.Add(gameObjectPointsList);
+                gameObjectListOfLinesLists.Add(gameObjectLinesList);
                 PointColor prevPoint = new PointColor(Vector3.zero);
                 for (int j = 0; j < userPointsList.Count; j++)
                 {
@@ -95,11 +96,10 @@ namespace Experiments.Lib
                     Move3D m3d = pointObject.AddComponent<Move3D>();
                     m3d.metaData.Add("listIndex", i);
                     m3d.metaData.Add("pointIndex", j);
-                    m3d.metaData.Add("hoverColor", point.hoverColor);
                     m3d.OnMove3DMovingEvent.AddListener(UpdatePointPosition);
                     m3d.OnMove3DMouseOver.AddListener(OnMove3DMouseOver);
                     m3d.OnMove3DMouseExit.AddListener(OnMove3DMouseExit);
-                    gameObjectPointList.Add(pointObject);
+                    gameObjectPointsList.Add(pointObject);
 
                     if (j > 0)
                     {
@@ -109,7 +109,7 @@ namespace Experiments.Lib
                         line.transform.SetPositionAndRotation(prevPoint.position, Quaternion.identity);
                         line.transform.up = (point.position - prevPoint.position);
                         line.transform.localScale = Vector3.one * point.lineThickness;
-                        gameObjectLineList.Add(line);
+                        gameObjectLinesList.Add(line);
                     };
 
                     prevPoint = point;
@@ -127,11 +127,12 @@ namespace Experiments.Lib
                 {
                     // Sync with Inspector if positions were changed there.
                     PointColor point = userPointsList[j];
-                    gameObjectListOfPointList[i][j].transform.position = point.position;
-                
-                    if (j > 0)
+                    GameObject gameObjectPoint  = gameObjectListOfPointsLists[i][j];
+                    gameObjectPoint.transform.position = point.position;
+
+                    if (j > 0 && (gameObjectPoint.transform.hasChanged || gameObjectListOfPointsLists[i][j - 1].transform.hasChanged))
                     {
-                        GameObject line = gameObjectListOfLineList[i][j - 1];
+                        GameObject line = gameObjectListOfLinesLists[i][j - 1];
                         Vector3 diff = (prevPoint.position - point.position);
                         Vector3 orientation = diff.normalized;
                         float distance = diff.magnitude;
@@ -155,7 +156,16 @@ namespace Experiments.Lib
                         // line.transform.rotation *= Quaternion.FromToRotation(Vector3.up, Vector3.forward);
                         // or just
                         line.transform.up = orientation;
+                        
+                        gameObjectListOfPointsLists[i][j - 1].transform.hasChanged = false;
                     };
+                    
+                    Boolean isLastPointInList = j == userPointsList.Count - 1;
+                    if (isLastPointInList)
+                    {
+                        gameObjectPoint.transform.hasChanged = false;
+                    }
+  
                     prevPoint = point;
                 }
             }
@@ -168,10 +178,10 @@ namespace Experiments.Lib
                 UserPointsList userPointsList = userListOfPointsLists[i];
                 for (int j = 0; j < userPointsList.Count; j++)
                 {
-                    Destroy(gameObjectListOfPointList[i][j]);
+                    Destroy(gameObjectListOfPointsLists[i][j]);
                     if (j > 0)
                     {
-                        Destroy(gameObjectListOfLineList[i][j - 1]);
+                        Destroy(gameObjectListOfLinesLists[i][j - 1]);
                     }
                 }
             }

@@ -26,6 +26,7 @@ namespace Experiments.Lib
         {
             mainCamera = Camera.main;
             screenPosition = mainCamera.WorldToScreenPoint(transform.localPosition);
+            transform.hasChanged = false;
         }
  
         private void OnMouseDown()
@@ -39,6 +40,7 @@ namespace Experiments.Lib
         private void OnMouseUp()
         {
             isDragging = false;
+            // transform.hasChanged = false;
         }
 
         private void OnMouseOver()
