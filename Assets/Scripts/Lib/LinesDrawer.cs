@@ -71,6 +71,7 @@ namespace Experiments.Lib
         public UserListOfPointsLists userListOfPointsLists = new UserListOfPointsLists();
         private List<List<GameObject>> gameObjectListOfPointsLists = new List<List<GameObject>>();
         private List<List<GameObject>> gameObjectListOfLinesLists = new List<List<GameObject>>();
+        public Boolean isEditable = true;
         
         public delegate void OnChange(Move3D gameObject);
         public event OnChange onChangeCallback;
@@ -93,13 +94,16 @@ namespace Experiments.Lib
                     pointObject.name = "Point: " + i + ", " + j;
                     pointObject.transform.SetPositionAndRotation(point.position, Quaternion.identity);
                     pointObject.transform.localScale = Vector3.one * point.thickness;
-                    Move3D m3d = pointObject.AddComponent<Move3D>();
-                    m3d.metaData.Add("listIndex", i);
-                    m3d.metaData.Add("pointIndex", j);
-                    m3d.OnMove3DMovingEvent.AddListener(UpdatePointPosition);
-                    m3d.OnMove3DMouseOver.AddListener(OnMove3DMouseOver);
-                    m3d.OnMove3DMouseExit.AddListener(OnMove3DMouseExit);
                     gameObjectPointsList.Add(pointObject);
+                    if (isEditable)
+                    {
+                        Move3D m3d = pointObject.AddComponent<Move3D>();
+                        m3d.metaData.Add("listIndex", i);
+                        m3d.metaData.Add("pointIndex", j);
+                        m3d.OnMove3DMovingEvent.AddListener(UpdatePointPosition);
+                        m3d.OnMove3DMouseOver.AddListener(OnMove3DMouseOver);
+                        m3d.OnMove3DMouseExit.AddListener(OnMove3DMouseExit);
+                    }
 
                     if (j > 0)
                     {
@@ -115,9 +119,16 @@ namespace Experiments.Lib
                     prevPoint = point;
                 }
             }
+            UpdatePositions();
         }
     
         void Update()
+        {
+            if (!isEditable) return;
+            UpdatePositions();
+        }
+
+        void UpdatePositions()
         {
             for (int i = 0; i < userListOfPointsLists.Count; i++)
             {
