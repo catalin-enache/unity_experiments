@@ -91,7 +91,7 @@ namespace Experiments.Lib
                     PointColor point = userPointsList[j];
                     GameObject pointObject = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                     pointObject.GetComponent<Renderer>().material.color = point.color;
-                    pointObject.name = "Point: " + i + ", " + j;
+                    pointObject.name = "P: " + i + ", " + j;
                     pointObject.transform.SetPositionAndRotation(point.position, Quaternion.identity);
                     pointObject.transform.localScale = Vector3.one * point.thickness;
                     gameObjectPointsList.Add(pointObject);

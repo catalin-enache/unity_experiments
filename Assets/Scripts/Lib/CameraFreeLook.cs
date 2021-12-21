@@ -11,6 +11,8 @@ namespace Experiments.Lib
         private Boolean goingDown;
         private float rotX;
         private float rotY;
+        public delegate void OnChange();
+        public OnChange OnCameraMove;
 
         void Start()
         {
@@ -49,7 +51,7 @@ namespace Experiments.Lib
             transform.rotation = Quaternion.Euler(rotX, rotY, 0);
             // or
             // transform.eulerAngles = new Vector3(rotX, rotY, 0);
-       
+            OnCameraMove.Invoke();
         }
     }
 }
