@@ -5,7 +5,7 @@ using UnityEngine.Events;
 
 namespace Experiments.Lib
 {
-    public class Move3DMovingEvent : UnityEvent<Move3D> { };
+    public class Move3DEvent : UnityEvent<Move3D> { };
 
     [RequireComponent(typeof(Collider))]
     public class Move3D : MonoBehaviour
@@ -19,9 +19,9 @@ namespace Experiments.Lib
         private Boolean isMouseOver;
         
         public Dictionary<string, object> metaData = new Dictionary<string, object>();
-        public Move3DMovingEvent OnMove3DMovingEvent = new Move3DMovingEvent();
-        public Move3DMovingEvent OnMove3DMouseOver = new Move3DMovingEvent();
-        public Move3DMovingEvent OnMove3DMouseExit = new Move3DMovingEvent();
+        public Move3DEvent OnMove3DMove = new Move3DEvent();
+        public Move3DEvent OnMove3DMouseOver = new Move3DEvent();
+        public Move3DEvent OnMove3DMouseExit = new Move3DEvent();
     
         void Start()
         {
@@ -73,7 +73,7 @@ namespace Experiments.Lib
             screenPosition = new Vector3(newXPos, newYPos, screenPosition.z);
             newWorldPosition = mainCamera.ScreenToWorldPoint(screenPosition);
             transform.localPosition = newWorldPosition;
-            OnMove3DMovingEvent.Invoke(this);
+            OnMove3DMove.Invoke(this);
         }
 
         void UpdateScreenPosition()

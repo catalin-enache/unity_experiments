@@ -100,7 +100,7 @@ namespace Experiments.Lib
                         Move3D m3d = pointObject.AddComponent<Move3D>();
                         m3d.metaData.Add("listIndex", i);
                         m3d.metaData.Add("pointIndex", j);
-                        m3d.OnMove3DMovingEvent.AddListener(UpdatePointPosition);
+                        m3d.OnMove3DMove.AddListener(UpdatePointPosition);
                         m3d.OnMove3DMouseOver.AddListener(OnMove3DMouseOver);
                         m3d.OnMove3DMouseExit.AddListener(OnMove3DMouseExit);
                     }
