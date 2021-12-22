@@ -83,6 +83,12 @@ namespace Experiments.Lib
 
         private void OnGUI()
         {
+            DrawCoords();
+            DrawDetailedCoords();
+        }
+
+        private void DrawCoords()
+        {
             if (!isMouseOver) return;
             
             GUI.skin.label.fontSize = 10;
@@ -91,8 +97,14 @@ namespace Experiments.Lib
             GUILayout.BeginArea(new Rect(screenPosition.x + 10, -screenPosition.y + mainCamera.pixelHeight - 10 , 250, 50));
             GUILayout.Label(name + " " + transform.localPosition.ToString("F2"));
             GUILayout.EndArea();
-            
+        }
+        
+        private void DrawDetailedCoords()
+        {
             if (!isDragging) return;
+            
+            GUI.skin.label.fontSize = 10;
+            GUI.contentColor = Color.cyan;
             
             Rect rect = new Rect(20, 20, mainCamera.pixelWidth - 40, mainCamera.pixelHeight - 40);
             GUILayout.BeginArea(rect);
