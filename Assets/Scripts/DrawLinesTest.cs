@@ -1,4 +1,6 @@
-﻿using Experiments.Lib;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Experiments.Lib;
 using UnityEngine;
 
 namespace Experiments
@@ -20,12 +22,15 @@ namespace Experiments
             ls.userListOfPointsLists[1].Add(new PointColor(new Vector3(5,5,0)));
 
             ls.onChangeCallback += OnChange;
+
+            List<WithTags> tags = FindObjectsOfType<WithTags>().Where(withTags => withTags.tags.Contains("One")).ToList();
+            Debug.Log(string.Join(" | ", tags.Select(withTags => string.Join(", ", withTags.tags)))); 
         }
 
         void Update()
         {
-            // Vector3 tmp = ls.userListOfPointsLists[0][0];
-            // ls.userListOfPointsLists[0][0] = new Vector3(tmp.x + Time.deltaTime * 1, tmp.y);
+            // PointColor tmp = ls.userListOfPointsLists[0][0];
+            // ls.userListOfPointsLists[0][0].position = new Vector3(tmp.position.x + Time.deltaTime * 1, tmp.position.y);
         }
 
         void OnChange(Move3D point)
