@@ -11,6 +11,7 @@ namespace Experiments.Lib
         // Unity doesn't know how to serialize a HashSet
         public HashSet<string> Tags = new HashSet<string>();
 
+        // https://docs.unity3d.com/2019.1/Documentation/ScriptReference/ISerializationCallbackReceiver.html
         public void OnBeforeSerialize()
         {
             #if UNITY_EDITOR

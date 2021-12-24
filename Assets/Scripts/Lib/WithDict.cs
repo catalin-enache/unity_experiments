@@ -13,6 +13,7 @@ namespace Experiments.Lib
         // Unity doesn't know how to serialize a Dictionary
         public Dictionary<string, string> Dict = new Dictionary<string, string>();
 
+        // https://docs.unity3d.com/2019.1/Documentation/ScriptReference/ISerializationCallbackReceiver.html
         public void OnBeforeSerialize()
         {
             if(!EditorApplication.isPlaying
