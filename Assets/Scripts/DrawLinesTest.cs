@@ -23,8 +23,12 @@ namespace Experiments
 
             ls.onChangeCallback += OnChange;
 
-            List<WithTags> tags = FindObjectsOfType<WithTags>().Where(withTags => withTags.Tags.Contains("One")).ToList();
-            Debug.Log(string.Join(" | ", tags.Select(withTags => string.Join(", ", withTags.Tags)))); 
+            List<WithTags> withTagsList = FindObjectsOfType<WithTags>().Where(withTags => withTags.Tags.Set.Contains("One")).ToList();
+            // FindObjectsOfType<WithDict>()[0].Dict.Dict.Add("bbb", "ccc");
+            // FindObjectsOfType<WithDict>()[0].Dict.Dict.Remove("qq");
+            // FindObjectsOfType<WithTags>()[0].Tags.Set.Add("new entry");
+            // FindObjectsOfType<WithTags>()[0].Tags.Set.Remove("Two");
+            Debug.Log(string.Join(" | ", withTagsList.Select(withTags => string.Join(", ", withTags.Tags.Set)))); 
         }
 
         void Update()

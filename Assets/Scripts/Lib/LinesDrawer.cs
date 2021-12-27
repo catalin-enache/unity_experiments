@@ -130,9 +130,20 @@ namespace Experiments.Lib
 
         void UpdatePositions()
         {
+            if (userListOfPointsLists.Count != gameObjectListOfPointsLists.Count)
+            {
+                // should not need to be checked but sometimes these arrays are not in sync
+                return;
+            }
             for (int i = 0; i < userListOfPointsLists.Count; i++)
             {
+                if (userListOfPointsLists[i].Count != gameObjectListOfPointsLists[i].Count)
+                {
+                    // should not need to be checked but sometimes these arrays are not in sync
+                    return;
+                }
                 UserPointsList userPointsList = userListOfPointsLists[i];
+                
                 PointColor prevPoint = new PointColor(Vector3.zero);
                 for (int j = 0; j < userPointsList.Count; j++)
                 {
