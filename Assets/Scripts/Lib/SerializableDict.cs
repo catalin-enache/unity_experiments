@@ -10,9 +10,10 @@ namespace Experiments.Lib
     [Serializable]
     public class SerializableDict<TKey, TValue> : ISerializationCallbackReceiver
     {
-        [SerializeField] private List<TKey> _keys = new List<TKey>();
-        [SerializeField] private List<TValue> _values = new List<TValue>();
+        [SerializeField] public List<TKey> _keys = new List<TKey>();
+        [SerializeField] public List<TValue> _values = new List<TValue>();
         public Dictionary<TKey, TValue> Dict = new Dictionary<TKey, TValue>();
+        public bool isEditMode = false;
 
         // https://docs.unity3d.com/2019.1/Documentation/ScriptReference/ISerializationCallbackReceiver.html
         public void OnBeforeSerialize()
@@ -23,8 +24,9 @@ namespace Experiments.Lib
                // && !EditorApplication.isCompiling
                // && !EditorApplication.isPlaying
                // _keys.Count != _values.Count
-               _keys.Count > Math.Max(Dict.Count, 1) && _keys[_keys.Count - 1].Equals(_keys[_keys.Count - 2])
-               ) return;
+               // _keys.Count > Math.Max(Dict.Count, 1) && _keys[_keys.Count - 1].Equals(_keys[_keys.Count - 2])
+               isEditMode
+            ) return;
             #endif
 
             _keys.Clear();
@@ -34,7 +36,7 @@ namespace Experiments.Lib
                 _keys.Add(kvp.Key);
                 _values.Add(kvp.Value);
             }
-            // Debug.Log("WithDict OnBeforeSerialize: " + _keys.Count + " " + _values.Count);
+            // Debug.Log("WithDictStringString OnBeforeSerialize: " + _keys.Count + " " + _values.Count);
         }
 
         public void OnAfterDeserialize()
@@ -46,7 +48,17 @@ namespace Experiments.Lib
                     Dict.Add(_keys[i], _values[i]);
                 };
             }
-            // Debug.Log("WithDict OnAfterDeserialize: " + Dict.Count);
+            // Debug.Log("WithDictStringString OnAfterDeserialize: " + Dict.Count);
+        }
+
+        public void DebugPrint()
+        {
+            string str = "";
+            foreach (var pair in Dict)
+            {
+                str += pair.Key + ": " + pair.Value + " | ";
+            }
+            Debug.Log(str);
         }
     }
 }

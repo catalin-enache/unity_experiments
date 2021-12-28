@@ -23,12 +23,12 @@ namespace Experiments
 
             ls.onChangeCallback += OnChange;
 
-            List<WithTags> withTagsList = FindObjectsOfType<WithTags>().Where(withTags => withTags.Tags.Set.Contains("One")).ToList();
-            // FindObjectsOfType<WithDict>()[0].Dict.Dict.Add("bbb", "ccc");
-            // FindObjectsOfType<WithDict>()[0].Dict.Dict.Remove("qq");
-            // FindObjectsOfType<WithTags>()[0].Tags.Set.Add("new entry");
-            // FindObjectsOfType<WithTags>()[0].Tags.Set.Remove("Two");
-            Debug.Log(string.Join(" | ", withTagsList.Select(withTags => string.Join(", ", withTags.Tags.Set)))); 
+            List<WithStringSet> withTagsList = FindObjectsOfType<WithStringSet>().Where(withTags => withTags.Set.Set.Contains("One")).ToList();
+            // FindObjectsOfType<WithDictStringString>()[0].Dict.Dict.Add("bbb", "ccc");
+            // FindObjectsOfType<WithDictStringString>()[0].Dict.Dict.Remove("qq");
+            // FindObjectsOfType<WithStringSet>()[0].Set.Set.Add("new entry");
+            // FindObjectsOfType<WithStringSet>()[0].Set.Set.Remove("Two");
+            Debug.Log(string.Join(" | ", withTagsList.Select(withTags => string.Join(", ", withTags.Set.Set)))); 
         }
 
         void Update()

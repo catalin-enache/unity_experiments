@@ -11,18 +11,19 @@ namespace Experiments.Lib
     {
         [SerializeField] private List<TValue> _set = new List<TValue>();
         public HashSet<TValue> Set = new HashSet<TValue>();
-
+        public bool isEditMode = false;
 
         // https://docs.unity3d.com/2019.1/Documentation/ScriptReference/ISerializationCallbackReceiver.html
         public void OnBeforeSerialize()
         {
             #if UNITY_EDITOR
             if(
-            // !EditorApplication.isUpdating
-            // && !EditorApplication.isCompiling
-            // && !EditorApplication.isPlaying
-            // if new item has been added in inspector (we know that new item is a clone of last item)
-            _set.Count > Math.Max(Set.Count, 1) && _set[_set.Count - 1].Equals(_set[_set.Count - 2])
+                // !EditorApplication.isUpdating
+                // && !EditorApplication.isCompiling
+                // && !EditorApplication.isPlaying
+                // if new item has been added in inspector (we know that new item is a clone of last item)
+                // _set.Count > Math.Max(Set.Count, 1) && _set[_set.Count - 1].Equals(_set[_set.Count - 2])
+                isEditMode
             ) return;
             #endif
 
@@ -42,6 +43,16 @@ namespace Experiments.Lib
                 Set.Add(aTag);
             }
             // Debug.Log("OnAfterDeserialize: " + Set.Count);
+        }
+        
+        public void DebugPrint()
+        {
+            string str = "";
+            foreach (var entry in Set)
+            {
+                str += entry + " | ";
+            }
+            Debug.Log(str);
         }
         
     }
