@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor;
 using UnityEngine;
 
 namespace Experiments.Lib
@@ -71,7 +72,7 @@ namespace Experiments.Lib
         public UserListOfPointsLists userListOfPointsLists = new UserListOfPointsLists();
         private List<List<GameObject>> gameObjectListOfPointsLists = new List<List<GameObject>>();
         private List<List<GameObject>> gameObjectListOfLinesLists = new List<List<GameObject>>();
-        public Boolean isEditable = true;
+        public Boolean isInitiallyInteractable = true;
         public bool isControllingViaUserPoints = true;
         
         public delegate void OnChange(Move3D gameObject);
@@ -91,24 +92,28 @@ namespace Experiments.Lib
                 {
                     PointColor point = userPointsList[j];
                     GameObject pointObject = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                    if (!isInitiallyInteractable)
+                    {
+                        pointObject.hideFlags = HideFlags.HideInHierarchy;
+                    }
                     pointObject.GetComponent<Renderer>().material.color = point.color;
                     pointObject.name = "P: " + i + ", " + j;
                     pointObject.transform.SetPositionAndRotation(point.position, Quaternion.identity);
                     pointObject.transform.localScale = Vector3.one * point.thickness;
                     gameObjectPointsList.Add(pointObject);
-                    if (isEditable)
-                    {
-                        Move3D m3d = pointObject.AddComponent<Move3D>();
-                        m3d.metaData.Add("listIndex", i);
-                        m3d.metaData.Add("pointIndex", j);
-                        m3d.OnMove3DMove.AddListener(UpdatePointPosition);
-                        m3d.OnMove3DMouseOver.AddListener(OnMove3DMouseOver);
-                        m3d.OnMove3DMouseExit.AddListener(OnMove3DMouseExit);
-                    }
-
+                    
+                    Move3D m3d = pointObject.AddComponent<Move3D>();
+                    m3d.metaData.Add("listIndex", i);
+                    m3d.metaData.Add("pointIndex", j);
+                    m3d.OnMove3DMove.AddListener(UpdatePointPosition);
+                    m3d.OnMove3DMouseOver.AddListener(OnMove3DMouseOver);
+                    m3d.OnMove3DMouseExit.AddListener(OnMove3DMouseExit);
+                    m3d.isMovable = isInitiallyInteractable;
+                    
                     if (j > 0)
                     {
                         GameObject line = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                        line.hideFlags = HideFlags.HideInHierarchy;
                         line.GetComponent<Renderer>().material.color = point.lineColor;
                         line.name = "Line: " + i + ", " + (j - 1);
                         line.transform.SetPositionAndRotation(prevPoint.position, Quaternion.identity);
@@ -125,7 +130,7 @@ namespace Experiments.Lib
     
         void Update()
         {
-            if (!isEditable) return;
+            if (!isInitiallyInteractable) return;
             UpdatePositions();
         }
 

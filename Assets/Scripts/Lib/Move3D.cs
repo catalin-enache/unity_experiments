@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEditor.PackageManager.Requests;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -22,6 +23,8 @@ namespace Experiments.Lib
         public Move3DEvent OnMove3DMove = new Move3DEvent();
         public Move3DEvent OnMove3DMouseOver = new Move3DEvent();
         public Move3DEvent OnMove3DMouseExit = new Move3DEvent();
+        
+        public bool isMovable = true;
     
         void Start()
         {
@@ -68,6 +71,7 @@ namespace Experiments.Lib
 
         void OnMouseDrag()
         {
+            if (!isMovable) return;
             float newXPos = Input.mousePosition.x - offsetX;
             float newYPos = Input.mousePosition.y - offsetY;
             screenPosition = new Vector3(newXPos, newYPos, screenPosition.z);
