@@ -72,6 +72,7 @@ namespace Experiments.Lib
         private List<List<GameObject>> gameObjectListOfPointsLists = new List<List<GameObject>>();
         private List<List<GameObject>> gameObjectListOfLinesLists = new List<List<GameObject>>();
         public Boolean isEditable = true;
+        public bool isControllingViaUserPoints = true;
         
         public delegate void OnChange(Move3D gameObject);
         public event OnChange onChangeCallback;
@@ -153,7 +154,17 @@ namespace Experiments.Lib
 
                     if (gameObjectPoint.transform.position != point.position)
                     {
-                        gameObjectPoint.transform.position = point.position;
+                        if (isControllingViaUserPoints)
+                        {
+                            // game object obeys userPoint (can use userPoints, scene gizmos are locked)
+                            // good for scripting
+                            gameObjectPoint.transform.position = point.position;
+                        }
+                        else
+                        {
+                            // userPoint obeys game object (can use scene gizmos, userPoints are locked)
+                            point.position = gameObjectPoint.transform.position;
+                        }
                     }
 
                     if (j > 0 && (gameObjectPoint.transform.hasChanged || gameObjectListOfPointsLists[i][j - 1].transform.hasChanged))
@@ -199,8 +210,18 @@ namespace Experiments.Lib
 
         private void OnDestroy()
         {
+            if (userListOfPointsLists.Count != gameObjectListOfPointsLists.Count)
+            {
+                // should not need to be checked but sometimes these arrays are not in sync
+                return;
+            }
             for (int i = 0; i < userListOfPointsLists.Count; i++)
             {
+                if (userListOfPointsLists[i].Count != gameObjectListOfPointsLists[i].Count)
+                {
+                    // should not need to be checked but sometimes these arrays are not in sync
+                    return;
+                }
                 UserPointsList userPointsList = userListOfPointsLists[i];
                 for (int j = 0; j < userPointsList.Count; j++)
                 {

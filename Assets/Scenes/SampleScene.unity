@@ -671,12 +671,14 @@ MonoBehaviour:
     - ww
     - gg
     - jj
+    - mm
     _values:
     - ee
     - rr
     - rr
     - uuu
-    isEditMode: 1
+    - mm
+    isEditMode: 0
 --- !u!114 &1714452670
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -689,11 +691,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 755e98bfd3c54354eb643da7b9fbccab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Tags:
+  Set:
     _set:
     - One
     - Two
-    - Three
+    isEditMode: 0
 --- !u!65 &1714452671
 BoxCollider:
   m_ObjectHideFlags: 0
