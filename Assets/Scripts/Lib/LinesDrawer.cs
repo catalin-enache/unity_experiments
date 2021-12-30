@@ -15,8 +15,9 @@ namespace Experiments.Lib
         [HideInInspector] public Color lineColor;
         [HideInInspector] public float thickness;
         [HideInInspector] public float lineThickness;
+        [HideInInspector] public bool activeSelf;
         
-        public PointColor(Vector3 position, Color? color = null, Color? hoverColor = null, float thickness = 0.1f, float lineThickness = 0.01f, Color? lineColor = null)
+        public PointColor(Vector3 position, Color? color = null, Color? hoverColor = null, float thickness = 0.1f, float lineThickness = 0.01f, Color? lineColor = null, bool activeSelf = true)
         {
             this.position = position;
             this.color = color ?? Color.white;
@@ -24,6 +25,7 @@ namespace Experiments.Lib
             this.lineColor = lineColor ?? Color.white;
             this.thickness = thickness;
             this.lineThickness = lineThickness;
+            this.activeSelf = activeSelf;
         }
 
 
@@ -73,6 +75,7 @@ namespace Experiments.Lib
         private List<List<GameObject>> gameObjectListOfPointsLists = new List<List<GameObject>>();
         private List<List<GameObject>> gameObjectListOfLinesLists = new List<List<GameObject>>();
         public Boolean isInitiallyInteractable = true;
+        public Boolean shouldHideInHierarchy = true;
         public bool isControllingViaUserPoints = true;
         
         public delegate void OnChange(Move3D gameObject);
@@ -92,7 +95,8 @@ namespace Experiments.Lib
                 {
                     PointColor point = userPointsList[j];
                     GameObject pointObject = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                    if (!isInitiallyInteractable)
+                    pointObject.SetActive(userPointsList[j].activeSelf);
+                    if (!isInitiallyInteractable || shouldHideInHierarchy)
                     {
                         pointObject.hideFlags = HideFlags.HideInHierarchy;
                     }
