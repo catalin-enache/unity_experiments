@@ -71,9 +71,10 @@ namespace Experiments.Lib
 
     public class LinesDrawer : MonoBehaviour
     {
-        public UserListOfPointsLists userListOfPointsLists = new UserListOfPointsLists();
+        private Material transparentMaterial = null;
         private List<List<GameObject>> gameObjectListOfPointsLists = new List<List<GameObject>>();
         private List<List<GameObject>> gameObjectListOfLinesLists = new List<List<GameObject>>();
+        public UserListOfPointsLists userListOfPointsLists = new UserListOfPointsLists();
         public Boolean isInitiallyInteractable = true;
         public Boolean shouldHideInHierarchy = true;
         public bool isControllingViaUserPoints = true;
@@ -83,6 +84,7 @@ namespace Experiments.Lib
 
         void Start()
         {
+            transparentMaterial = Resources.Load<Material>("Materials/mat_WhiteTransparent");
             for (int i = 0; i < userListOfPointsLists.Count; i++)
             {
                 UserPointsList userPointsList = userListOfPointsLists[i];
@@ -95,6 +97,7 @@ namespace Experiments.Lib
                 {
                     PointColor point = userPointsList[j];
                     GameObject pointObject = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                    pointObject.GetComponent<Renderer>().material = transparentMaterial;
                     pointObject.SetActive(userPointsList[j].activeSelf);
                     if (!isInitiallyInteractable || shouldHideInHierarchy)
                     {
@@ -118,6 +121,7 @@ namespace Experiments.Lib
                     {
                         GameObject line = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
                         line.hideFlags = HideFlags.HideInHierarchy;
+                        line.GetComponent<Renderer>().material = transparentMaterial;
                         line.GetComponent<Renderer>().material.color = point.lineColor;
                         line.name = "Line: " + i + ", " + (j - 1);
                         line.transform.SetPositionAndRotation(prevPoint.position, Quaternion.identity);

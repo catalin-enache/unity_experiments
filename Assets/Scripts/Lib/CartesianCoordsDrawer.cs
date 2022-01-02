@@ -31,11 +31,12 @@ namespace Experiments.Lib
 
         void DrawCoord(_coords coord)
         {
+            float transparency = 0.3f;
             // if coord is X
             Vector3 vector = Vector3.right;
-            Color pointColor = Color.red;
-            Color smallPointColor = new Color(0.3f,0,0);
-            Color lineColor = Color.red;
+            Color pointColor = new Color(1,0,0,transparency);
+            Color smallPointColor = new Color(0.3f,0,0, transparency);
+            Color lineColor = new Color(1,0,0, transparency);
             UserPointsList list = xCoordList;
             
             float pointThickness = 0.09f;
@@ -45,17 +46,17 @@ namespace Experiments.Lib
             if (coord == _coords.y)
             {
                 vector = Vector3.up;
-                pointColor = Color.green;
-                smallPointColor = new Color(0,0.3f,0);
-                lineColor = Color.green;
+                pointColor = new Color(0,1,0, transparency);
+                smallPointColor = new Color(0,0.3f,0, transparency);
+                lineColor = new Color(0,1,0, transparency);
                 list = yCoordList;
             }
             else if (coord == _coords.z)
             {
                 vector = Vector3.forward;
-                pointColor = Color.blue;
-                smallPointColor = new Color(0,0,0.3f);
-                lineColor = Color.blue;
+                pointColor = new Color(0,0,1, transparency);
+                smallPointColor = new Color(0,0,0.3f, transparency);
+                lineColor = new Color(0,0,1, transparency);
                 list = zCoordList;
             }
             
