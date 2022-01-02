@@ -2,7 +2,7 @@
 
 namespace Experiments.Lib
 {
-    // https://developer.mozilla.org/en-US/docs/Games/Techniques/3D_collision_detection#sphere_vs._aabb
+    
     public class AABoundingBox : MonoBehaviour
     {
         private GameObject minPosHandler = null;
@@ -28,6 +28,11 @@ namespace Experiments.Lib
                 _AABBColor = value;
                 AABB.GetComponent<Renderer>().material.color = value;
             }
+        }
+
+        public void SetIsIntersectingColor(bool isIntersecting)
+        {
+            AABBColor = isIntersecting ? AABBIntersectColor : AABBNormalColor;
         }
         
         void Start()
@@ -130,6 +135,7 @@ namespace Experiments.Lib
 
         public bool IntersectsWithSphere(GameObject sphere)
         {
+            // https://developer.mozilla.org/en-US/docs/Games/Techniques/3D_collision_detection#sphere_vs._aabb
             SphereCollider sphereCollider = sphere.GetComponent<SphereCollider>();
             float sphereRadius = sphereCollider.radius * sphereCollider.transform.localScale.x;
             float sphereRadiusSquared = Mathf.Pow(sphereRadius, 2);
@@ -137,7 +143,15 @@ namespace Experiments.Lib
             Vector3 closestPointPosition = ClosestPointToOtherPoint(spherePosition);
             float distanceSquared = (spherePosition - closestPointPosition).sqrMagnitude;
             bool isIntersecting =  distanceSquared < sphereRadiusSquared;
-            AABBColor = isIntersecting ? AABBIntersectColor : AABBNormalColor;
+            return isIntersecting;
+        }
+
+        public bool IntersectWithBoundingBox(AABoundingBox boundingBox)
+        {
+            // https://developer.mozilla.org/en-US/docs/Games/Techniques/3D_collision_detection#aabb_vs._aabb
+            bool isIntersecting = (MinPos.x <= boundingBox.MaxPos.x && MaxPos.x >= boundingBox.MinPos.x)
+                                   && (MinPos.y <= boundingBox.MaxPos.y && MaxPos.y >= boundingBox.MinPos.y)
+                                   && (MinPos.z <= boundingBox.MaxPos.z && MaxPos.z >= boundingBox.MinPos.z);
             return isIntersecting;
         }
     }
