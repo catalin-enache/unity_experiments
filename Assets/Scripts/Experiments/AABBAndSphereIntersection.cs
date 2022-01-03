@@ -9,12 +9,15 @@ namespace Experiments.Experiments
 
         private AABoundingBox boundingBox1 = null;
         private AABoundingBox boundingBox2 = null;
+        private AABoundingBox boundingBoxIntersection = null;
         public GameObject sphere = null;
         public GameObject point = null;
         void Start()
         {
             boundingBox1 = gameObject.AddComponent<AABoundingBox>();
             boundingBox2 = gameObject.AddComponent<AABoundingBox>();
+            boundingBoxIntersection = gameObject.AddComponent<AABoundingBox>();
+            boundingBoxIntersection.hideFlags = HideFlags.HideInHierarchy;
 
             sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             point = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -36,6 +39,9 @@ namespace Experiments.Experiments
             boundingBox1.CenterPos = Vector3.right * -2f;
             boundingBox2.UseMinMax = false;
             boundingBox2.CenterPos = Vector3.right * 2f;
+            boundingBoxIntersection.ShouldShowHandlers(false);
+            boundingBoxIntersection.ShouldShowAABB(false);
+            boundingBoxIntersection.AABBColor = new Color(0, 1, 0, 0.3f);
         }
 
         void Update()
@@ -44,10 +50,20 @@ namespace Experiments.Experiments
             bool bb2AndSphere = boundingBox2.IsIntersectingWithSphere(sphere);
             bool bb1AndPoint = boundingBox1.IsIntersectingWithPoint(point.transform.position);
             bool bb2AndPoint = boundingBox2.IsIntersectingWithPoint(point.transform.position);
-            bool bb1AndBb2 = boundingBox1.IsIntersectingWithBoundingBox(boundingBox2);
-            bool bb2AndBb1 = boundingBox2.IsIntersectingWithBoundingBox(boundingBox1);
-            boundingBox1.SetIsIntersectingColor(bb1AndSphere || bb1AndBb2 || bb1AndPoint);
-            boundingBox2.SetIsIntersectingColor(bb2AndSphere || bb2AndBb1 || bb2AndPoint);
+            (Vector3, Vector3)? bb1AndBb2 = boundingBox1.IsIntersectingWithBoundingBox(boundingBox2);
+            (Vector3, Vector3)? bb2AndBb1 = boundingBox2.IsIntersectingWithBoundingBox(boundingBox1);
+            boundingBox1.SetIsIntersectingColor(bb1AndSphere || bb1AndBb2 != null || bb1AndPoint);
+            boundingBox2.SetIsIntersectingColor(bb2AndSphere || bb2AndBb1 != null || bb2AndPoint);
+            boundingBoxIntersection.ShouldShowAABB(false);
+            
+            // show AABB of intersection if any
+            if (bb1AndBb2 != null)
+            {
+                (Vector3 minPos, Vector3 maxPos) = ((Vector3, Vector3))bb1AndBb2;
+                boundingBoxIntersection.MinPos = minPos;
+                boundingBoxIntersection.MaxPos = maxPos;
+                boundingBoxIntersection.ShouldShowAABB(true);
+            } 
         }
     }
 }

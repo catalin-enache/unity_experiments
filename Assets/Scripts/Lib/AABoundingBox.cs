@@ -30,6 +30,18 @@ namespace Experiments.Lib
             }
         }
 
+        public void ShouldShowAABB(bool shouldShow)
+        {
+            AABB.gameObject.SetActive(shouldShow);
+        }
+
+        public void ShouldShowHandlers(bool shouldShow)
+        {
+            minPosHandler.gameObject.SetActive(shouldShow);
+            maxPosHandler.gameObject.SetActive(shouldShow);
+            centerPosHandler.gameObject.SetActive(shouldShow);
+        }
+
         public void SetIsIntersectingColor(bool isIntersecting)
         {
             AABBColor = isIntersecting ? AABBIntersectColor : AABBNormalColor;
@@ -148,13 +160,29 @@ namespace Experiments.Lib
             return isIntersecting;
         }
 
-        public bool IsIntersectingWithBoundingBox(AABoundingBox boundingBox)
+        public (Vector3, Vector3)? IsIntersectingWithBoundingBox(AABoundingBox boundingBox)
         {
             // https://developer.mozilla.org/en-US/docs/Games/Techniques/3D_collision_detection#aabb_vs._aabb
             bool isIntersecting = (MinPos.x <= boundingBox.MaxPos.x && MaxPos.x >= boundingBox.MinPos.x)
                                    && (MinPos.y <= boundingBox.MaxPos.y && MaxPos.y >= boundingBox.MinPos.y)
                                    && (MinPos.z <= boundingBox.MaxPos.z && MaxPos.z >= boundingBox.MinPos.z);
-            return isIntersecting;
+            
+            Vector3 minPos = new Vector3(
+                Mathf.Max(MinPos.x, boundingBox.MinPos.x),
+                Mathf.Max(MinPos.y, boundingBox.MinPos.y),
+                Mathf.Max(MinPos.z, boundingBox.MinPos.z)
+            );
+            Vector3 maxPos = new Vector3(
+                Mathf.Min(MaxPos.x, boundingBox.MaxPos.x),
+                Mathf.Min(MaxPos.y, boundingBox.MaxPos.y),
+                Mathf.Min(MaxPos.z, boundingBox.MaxPos.z)
+            );
+
+            if (isIntersecting)
+            {
+                return (minPos, maxPos);
+            }
+            return null;
         }
 
         public bool IsIntersectingWithPoint(Vector3 point)
