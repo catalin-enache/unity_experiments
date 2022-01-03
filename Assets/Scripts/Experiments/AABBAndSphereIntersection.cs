@@ -57,6 +57,7 @@ namespace Experiments.Experiments
             boundingBoxIntersection.ShouldShowAABB(false);
             
             // show AABB of intersection if any
+            boundingBoxIntersection.UseMinMax = true; // don't allow user override
             if (bb1AndBb2 != null)
             {
                 (Vector3 minPos, Vector3 maxPos) = ((Vector3, Vector3))bb1AndBb2;
