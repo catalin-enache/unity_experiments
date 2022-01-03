@@ -47,9 +47,11 @@ namespace Experiments.Lib
             centerPosHandler.name = "Center";
             AABB = GameObject.CreatePrimitive(PrimitiveType.Cube);
             AABB.name = "AABB";
+            AABB.hideFlags = HideFlags.HideInHierarchy;
             AABB.GetComponent<Renderer>().material.color = AABBColor;
             closestPoint = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             closestPoint.name = "Closest Point";
+            closestPoint.hideFlags = HideFlags.HideInHierarchy;
             
             minPosHandler.GetComponent<Renderer>().material = handlersMaterial;
             maxPosHandler.GetComponent<Renderer>().material = handlersMaterial;
@@ -133,7 +135,7 @@ namespace Experiments.Lib
             return closestPointPosition;
         }
 
-        public bool IntersectsWithSphere(GameObject sphere)
+        public bool IsIntersectingWithSphere(GameObject sphere)
         {
             // https://developer.mozilla.org/en-US/docs/Games/Techniques/3D_collision_detection#sphere_vs._aabb
             SphereCollider sphereCollider = sphere.GetComponent<SphereCollider>();
@@ -146,12 +148,21 @@ namespace Experiments.Lib
             return isIntersecting;
         }
 
-        public bool IntersectWithBoundingBox(AABoundingBox boundingBox)
+        public bool IsIntersectingWithBoundingBox(AABoundingBox boundingBox)
         {
             // https://developer.mozilla.org/en-US/docs/Games/Techniques/3D_collision_detection#aabb_vs._aabb
             bool isIntersecting = (MinPos.x <= boundingBox.MaxPos.x && MaxPos.x >= boundingBox.MinPos.x)
                                    && (MinPos.y <= boundingBox.MaxPos.y && MaxPos.y >= boundingBox.MinPos.y)
                                    && (MinPos.z <= boundingBox.MaxPos.z && MaxPos.z >= boundingBox.MinPos.z);
+            return isIntersecting;
+        }
+
+        public bool IsIntersectingWithPoint(Vector3 point)
+        {
+            // https://developer.mozilla.org/en-US/docs/Games/Techniques/3D_collision_detection#point_vs._aabb
+            bool isIntersecting = point.x >= MinPos.x && point.x <= MaxPos.x
+                                                      && point.y >= MinPos.y && point.y <= MaxPos.y
+                                                      && point.z >= MinPos.z && point.z <= MaxPos.z;
             return isIntersecting;
         }
     }
