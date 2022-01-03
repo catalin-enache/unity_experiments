@@ -106,8 +106,8 @@ namespace Experiments.Lib
 
         void UpdateMinMaxFromCenterAndScale()
         {
-            MinPos = CenterPos - new Vector3(Scale.x / 2, Scale.y / 2, Scale.z / 2);
-            MaxPos = CenterPos + new Vector3(Scale.x / 2, Scale.y / 2, Scale.z / 2);
+            MinPos = CenterPos - Scale / 2;
+            MaxPos = CenterPos + Scale / 2;
         }
         
         void UpdatePositions()
